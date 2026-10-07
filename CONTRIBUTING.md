@@ -10,7 +10,7 @@
 ## 测试
 
 ```powershell
-node --test tests/logic.test.js
+node --test
 ```
 
 ## 提交约定
