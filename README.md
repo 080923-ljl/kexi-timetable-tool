@@ -62,7 +62,7 @@
 项目使用 Node.js 内置测试运行器，无第三方依赖：
 
 ```powershell
-node --test tests/logic.test.js
+node --test
 ```
 
 测试覆盖：
