@@ -2,6 +2,11 @@
 
 一个从课表计算空闲时间的纯前端小工具。支持手动录入、CSV 导入、每日空闲计算，以及多人共同空闲时间筛选。
 
+## 在线访问
+
+- 网页：https://080923-ljl.github.io/kexi-timetable-tool/
+- GitHub 仓库：https://github.com/080923-ljl/kexi-timetable-tool
+
 ## 直接运行
 
 不需要安装依赖或启动服务，直接打开根目录下的 `index.html` 即可。
