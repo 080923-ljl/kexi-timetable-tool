@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="课隙：从个人课表计算每日空闲时间，并找出多人的共同空闲时段。"
+    />
+    <title>课隙｜课表空闲计算器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 2v4M16 2v4M3 10h18" />
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <path d="M8 14h2M14 14h2M8 18h2" />
+          </svg>
+        </span>
+        <span>
+          <strong>课隙</strong>
+          <small>课表空闲计算器</small>
+        </span>
+      </div>
+      <div class="topbar-meta">
+        <span class="save-state"><i aria-hidden="true"></i>自动保存</span>
+        <span id="data-summary">0 位成员 · 0 门课程</span>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-heading">
+          <div>
+            <p class="eyebrow">成员</p>
+            <h2>课表清单</h2>
+          </div>
+          <button class="icon-button" id="add-participant" type="button" title="新增成员" aria-label="新增成员">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="participant-list" id="participant-list"></div>
+
+        <div class="sidebar-actions">
+          <button class="secondary-button full-width" id="load-sample" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+            载入示例
+          </button>
+          <button class="ghost-button full-width danger-text" id="clear-data" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6" />
+            </svg>
+            清空全部
+          </button>
+        </div>
+
+        <p class="storage-note">数据仅保存在当前浏览器。</p>
+      </aside>
+
+      <main class="workspace">
+        <nav class="tab-nav" role="tablist" aria-label="计算步骤">
+          <button
+            class="tab-button is-active"
+            id="tab-1"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-1"
+            data-tab="1"
+          >
+            <span class="tab-index">1</span>
+            <span>录入课表</span>
+          </button>
+          <button
+            class="tab-button"
+            id="tab-2"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-2"
+            data-tab="2"
+          >
+            <span class="tab-index">2</span>
+            <span>计算空闲</span>
+          </button>
+          <button
+            class="tab-button"
+            id="tab-3"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-3"
+            data-tab="3"
+          >
+            <span class="tab-index">3</span>
+            <span>共同空闲</span>
+          </button>
+        </nav>
+
+        <section class="panel is-active" id="panel-1" role="tabpanel" aria-labelledby="tab-1">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">需求 1</p>
+              <h1>录入课表</h1>
+              <p>手动填写课程，或导入 CSV，并生成“本周课表”的文本视图。</p>
+            </div>
+            <span class="active-member-label">当前成员：<strong id="active-member-name">未命名</strong></span>
+          </div>
+
+          <div class="entry-layout">
+            <div class="entry-column">
+              <section class="tool-block">
+                <div class="block-heading">
+                  <div>
+                    <h2>手动添加</h2>
+                    <p>一门课程可以是单节，也可以连续添加多节。</p>
+                  </div>
+                </div>
+                <form class="course-form" id="course-form">
+                  <label class="field course-name-field">
+                    <span>课程名</span>
+                    <input id="course-name" name="course" type="text" placeholder="例如：高等数学" required />
+                  </label>
+                  <label class="field">
+                    <span>星期几</span>
+                    <select id="course-day" name="day" required>
+                      <option value="1">星期一</option>
+                      <option value="2">星期二</option>
+                      <option value="3">星期三</option>
+                      <option value="4">星期四</option>
+                      <option value="5">星期五</option>
+                      <option value="6">星期六</option>
+                      <option value="7">星期日</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>开始时间</span>
+                    <input id="course-start" name="start" type="time" value="09:00" required />
+                  </label>
+                  <label class="field">
+                    <span>结束时间</span>
+                    <input id="course-end" name="end" type="time" value="09:45" required />
+                  </label>
+                  <button class="primary-button course-submit" type="submit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    添加课程
+                  </button>
+                </form>
+              </section>
+
+              <section class="tool-block">
+                <div class="block-heading">
+                  <div>
+                    <h2>CSV 导入</h2>
+                    <p>字段：课程名、星期几、开始时间、结束时间。</p>
+                  </div>
+                </div>
+                <div class="csv-actions">
+                  <label class="secondary-button file-button" for="csv-file">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 16V4M7 9l5-5 5 5M5 20h14" />
+                    </svg>
+                    选择 CSV
+                  </label>
+                  <input id="csv-file" type="file" accept=".csv,text/csv" hidden />
+                  <button class="ghost-button" id="download-template" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 4v12M7 11l5 5 5-5M5 20h14" />
+                    </svg>
+                    下载模板
+                  </button>
+                </div>
+                <p class="inline-status" id="csv-status" role="status">尚未导入文件</p>
+              </section>
+
+              <section class="tool-block course-manager">
+                <div class="block-heading">
+                  <div>
+                    <h2>课程条目</h2>
+                    <p id="course-count-label">当前成员共有 0 节课程。</p>
+                  </div>
+                </div>
+                <div class="course-list" id="course-list"></div>
+              </section>
+            </div>
+
+            <section class="tool-block timetable-preview">
+              <div class="block-heading preview-heading">
+                <div>
+                  <h2>本周课表</h2>
+                  <p>同一课程连续节次会按课间容差自动合并。</p>
+                </div>
+                <button class="icon-button" id="copy-timetable" type="button" title="复制文本" aria-label="复制课表文本">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="14" height="14" x="8" y="8" rx="2" />
+                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                  </svg>
+                </button>
+              </div>
+              <pre class="timetable-text" id="timetable-text"></pre>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-2" role="tabpanel" aria-labelledby="tab-2" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">需求 2</p>
+              <h1>计算空闲</h1>
+              <p>设置每日可用时间范围，扣除课程后得到连续空闲时段。</p>
+            </div>
+            <span class="active-member-label">正在计算：<strong id="free-member-name">未命名</strong></span>
+          </div>
+
+          <div class="metric-strip" id="free-metrics"></div>
+
+          <div class="calculation-layout">
+            <section class="tool-block availability-block">
+              <div class="block-heading">
+                <div>
+                  <h2>每日可用时间</h2>
+                  <p>未启用的日期不会参与空闲计算。</p>
+                </div>
+              </div>
+              <div class="availability-list" id="availability-list"></div>
+            </section>
+
+            <section class="tool-block settings-block">
+              <div class="block-heading">
+                <div>
+                  <h2>计算规则</h2>
+                  <p>用于处理连续课程和过短的零散空隙。</p>
+                </div>
+              </div>
+              <label class="field">
+                <span>同一课程合并容差</span>
+                <select id="merge-gap">
+                  <option value="0">不合并</option>
+                  <option value="5">5 分钟</option>
+                  <option value="10">10 分钟</option>
+                  <option value="15">15 分钟</option>
+                  <option value="20">20 分钟</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>最短空闲时长</span>
+                <select id="min-free">
+                  <option value="15">15 分钟</option>
+                  <option value="30">30 分钟</option>
+                  <option value="45">45 分钟</option>
+                  <option value="60">1 小时</option>
+                  <option value="90">1.5 小时</option>
+                  <option value="120">2 小时</option>
+                </select>
+              </label>
+              <div class="rule-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
+                <span id="rule-summary"></span>
+              </div>
+            </section>
+          </div>
+
+          <section class="results-section">
+            <div class="results-heading">
+              <div>
+                <h2>空闲时段</h2>
+                <p>按星期顺序展示。</p>
+              </div>
+              <span class="results-count" id="free-results-count">0 个时段</span>
+            </div>
+            <div class="day-results" id="free-results"></div>
+          </section>
+        </section>
+
+        <section class="panel" id="panel-3" role="tabpanel" aria-labelledby="tab-3" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">需求 3</p>
+              <h1>共同空闲</h1>
+              <p>选择至少两位成员，计算所有人都有空的时间，并按持续时间从长到短排序。</p>
+            </div>
+          </div>
+
+          <section class="tool-block common-picker">
+            <div class="block-heading">
+              <div>
+                <h2>选择成员</h2>
+                <p id="common-picker-summary">当前选择 0 位成员。</p>
+              </div>
+              <button class="ghost-button" id="select-all-common" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+                全选
+              </button>
+            </div>
+            <div class="common-participant-list" id="common-participant-list"></div>
+          </section>
+
+          <div class="metric-strip" id="common-metrics"></div>
+
+          <section class="results-section">
+            <div class="results-heading">
+              <div>
+                <h2>共同可约时间</h2>
+                <p>时间越长的选项排得越靠前。</p>
+              </div>
+              <span class="results-count" id="common-results-count">0 个时段</span>
+            </div>
+            <div class="common-results" id="common-results"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="logic.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
